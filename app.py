@@ -76,8 +76,8 @@ class WarehouseTotalResource(Resource):
         return len(posts_schema.dump(resources))
 
 
-api.add_resource(WarehouseListResource, '/resources')
-api.add_resource(WarehouseTotalResource, '/total_cost/<int:resource_id>')
+api.add_resource(WarehouseListResource, '/resources', '/resources/<int:resource_id>')
+api.add_resource(WarehouseTotalResource, '/total_cost')
 post_schema = WarehouseSchema()
 posts_schema = WarehouseSchema(many=True)
 

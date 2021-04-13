@@ -55,13 +55,13 @@ class WarehouseListResource(Resource):
         if 'title' in request.json:
             resource.title = request.json['title']
         if 'amount' in request.json:
-            resource.content = request.json['amount']
+            resource.amount = request.json['amount']
         if 'unit' in request.json:
-            resource.content = request.json['unit']
+            resource.unit = request.json['unit']
         if 'price' in request.json:
-            resource.content = request.json['price']
+            resource.price = request.json['price']
         if 'date' in request.json:
-            resource.content = request.json['date']
+            resource.date = request.json['date']
 
         db.session.commit()
         return post_schema.dump(resource)
@@ -78,7 +78,7 @@ class WarehouseTotalResource(Resource):
     @staticmethod
     def get():
         resources = Warehouse.query.all()
-        return {'total_count': len(posts_schema.dump(resources))}
+        return {'total_cost': len(posts_schema.dump(resources))}
 
 
 api.add_resource(WarehouseListResource, '/resources', '/resources/<int:resource_id>')

@@ -70,13 +70,13 @@ class WarehouseListResource(Resource):
 
     @staticmethod
     def delete(resource_id):
-        post = Warehouse.query.get_or_404(resource_id)
-        db.session.delete(post)
+        resource = Warehouse.query.get_or_404(resource_id)
+        db.session.delete(resource)
         db.session.commit()
         return '', 204
 
 
-class WarehouseTotalResource(Resource):
+class WarehouseTotalCost(Resource):
     @staticmethod
     def get():
         resources = Warehouse.query.all()
@@ -85,7 +85,7 @@ class WarehouseTotalResource(Resource):
 
 
 api.add_resource(WarehouseListResource, '/resources', '/resources/<int:resource_id>')
-api.add_resource(WarehouseTotalResource, '/total_cost')
+api.add_resource(WarehouseTotalCost, '/total_cost')
 post_schema = WarehouseSchema()
 posts_schema = WarehouseSchema(many=True)
 

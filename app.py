@@ -20,9 +20,6 @@ class Warehouse(db.Model):
     cost = db.Column(db.Integer())
     date = db.Column(db.String(50))
 
-    def __repr__(self):
-        return "<Resource %s" % self.title
-
 
 class WarehouseSchema(ma.Schema):
     class Meta:
@@ -50,8 +47,7 @@ class WarehouseListResource(Resource):
         db.session.commit()
         return post_schema.dump(new_resource)
 
-    @staticmethod
-    def patch(resource_id):
+    def patch(self, resource_id):
         resource = Warehouse.query.get_or_404(resource_id)
 
         if 'title' in request.json:
@@ -64,6 +60,7 @@ class WarehouseListResource(Resource):
             resource.price = request.json['price']
         if 'date' in request.json:
             resource.date = request.json['date']
+        resource.date = request.json['amount'] * request.json['price']
 
         db.session.commit()
         return post_schema.dump(resource)
@@ -84,7 +81,7 @@ class WarehouseTotalCost(Resource):
         return {'total_cost': total_cost}
 
 
-api.add_resource(WarehouseListResource, '/resources', '/resources/<int:resource_id>')
+api.add_resource(WarehouseListResource, '/resources')
 api.add_resource(WarehouseTotalCost, '/total_cost')
 post_schema = WarehouseSchema()
 posts_schema = WarehouseSchema(many=True)

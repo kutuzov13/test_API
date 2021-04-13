@@ -78,7 +78,7 @@ class WarehouseTotalResource(Resource):
     @staticmethod
     def get():
         resources = Warehouse.query.all()
-        return len(posts_schema.dump(resources))
+        return {'total_count': len(posts_schema.dump(resources))}
 
 
 api.add_resource(WarehouseListResource, '/resources', '/resources/<int:resource_id>')

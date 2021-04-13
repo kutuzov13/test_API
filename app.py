@@ -32,7 +32,7 @@ class WarehouseSchema(ma.Schema):
 class WarehouseListResource(Resource):
     def get(self):
         warehouse = Warehouse.query.all()
-        return posts_schema.dump(warehouse)
+        return {'resources': posts_schema.dump(warehouse)}
 
     def post(self):
         new_resource = Warehouse(

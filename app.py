@@ -1,5 +1,3 @@
-from datetime import datetime, date
-
 from flask import Flask, request
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
@@ -40,11 +38,11 @@ api = Api(app)
 
 class Post(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    title = db.Column(db.String())
+    title = db.Column(db.String(50))
     amount = db.Column(db.REAL())
     unit = db.Column(db.String(50))
     cost = db.Column(db.REAL())
-    date = db.Column(db.String())
+    date = db.Column(db.String(50))
 
     def __repr__(self):
         return "<Resource %s" % self.title
@@ -74,6 +72,30 @@ class PostListResource(Resource):
         return post_schema.dump(new_post)
 
 
+class PostResource(Resource):
+    def get(self):
+        posts = Post.query.all()
+        return len(posts_schema.dump(posts))
+
+    def update(self, post_id):
+        post = Post.query.get_or_404(post_id)
+
+        if 'title' in request.json:
+            post.title = request.json['title']
+        if 'content' in request.json:
+            post.content = request.json['content']
+
+        db.session.commit()
+        return post_schema.dump(post)
+
+    def delete(self, post_id):
+        post = Post.query.get_or_404(post_id)
+        db.session.delete(post)
+        db.session.commit()
+        return '', 204
+
+
+api.add_resource(PostResource, '/total_cost')
 api.add_resource(PostListResource, '/resources')
 post_schema = PostSchema()
 posts_schema = PostSchema(many=True)

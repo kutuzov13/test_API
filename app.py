@@ -78,7 +78,8 @@ class WarehouseTotalResource(Resource):
     @staticmethod
     def get():
         resources = Warehouse.query.all()
-        return {'total_cost': len(posts_schema.dump(resources))}
+        price_total = int(sum([price.price for price in resources]))
+        return {'total_cost': price_total}
 
 
 api.add_resource(WarehouseListResource, '/resources', '/resources/<int:resource_id>')

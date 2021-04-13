@@ -17,6 +17,7 @@ class Warehouse(db.Model):
     amount = db.Column(db.REAL())
     unit = db.Column(db.String(50))
     price = db.Column(db.REAL())
+    cost = db.Column(db.Integer())
     date = db.Column(db.String(50))
 
     def __repr__(self):
@@ -25,7 +26,7 @@ class Warehouse(db.Model):
 
 class WarehouseSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'amount', 'price', 'date', 'title', 'unit')
+        fields = ('title', 'id', 'amount', 'unit', 'price', 'cost', 'date')
         model = Warehouse
 
 

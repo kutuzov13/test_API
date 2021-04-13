@@ -33,7 +33,7 @@ class WarehouseListResource(Resource):
     @staticmethod
     def get():
         warehouse = Warehouse.query.all()
-        return {'resources': posts_schema.dump(warehouse)}
+        return {'resources': posts_schema.dump(warehouse), 'total_count': len(posts_schema.dump(warehouse))}
 
     @staticmethod
     def post():

@@ -43,6 +43,7 @@ class WarehouseListResource(Resource):
             amount=request.json['amount'],
             unit=request.json['unit'],
             price=request.json['price'],
+            cost=request.json['amount'] * request.json['price'],
             date=request.json['date']
         )
         db.session.add(new_resource)
@@ -79,8 +80,8 @@ class WarehouseTotalResource(Resource):
     @staticmethod
     def get():
         resources = Warehouse.query.all()
-        price_total = int(sum([price.price for price in resources]))
-        return {'total_cost': price_total}
+        total_cost = int(sum([cost.cost for cost in resources]))
+        return {'total_cost': total_cost}
 
 
 api.add_resource(WarehouseListResource, '/resources', '/resources/<int:resource_id>')

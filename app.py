@@ -30,11 +30,13 @@ class WarehouseSchema(ma.Schema):
 
 
 class WarehouseListResource(Resource):
-    def get(self):
+    @staticmethod
+    def get():
         warehouse = Warehouse.query.all()
         return {'resources': posts_schema.dump(warehouse)}
 
-    def post(self):
+    @staticmethod
+    def post():
         new_resource = Warehouse(
             title=request.json['title'],
             amount=request.json['amount'],
@@ -46,7 +48,8 @@ class WarehouseListResource(Resource):
         db.session.commit()
         return post_schema.dump(new_resource)
 
-    def patch(self, resource_id):
+    @staticmethod
+    def patch(resource_id):
         resource = Warehouse.query.get_or_404(resource_id)
 
         if 'title' in request.json:
@@ -63,7 +66,8 @@ class WarehouseListResource(Resource):
         db.session.commit()
         return post_schema.dump(resource)
 
-    def delete(self, resource_id):
+    @staticmethod
+    def delete(resource_id):
         post = Warehouse.query.get_or_404(resource_id)
         db.session.delete(post)
         db.session.commit()
@@ -71,7 +75,8 @@ class WarehouseListResource(Resource):
 
 
 class WarehouseTotalResource(Resource):
-    def get(self):
+    @staticmethod
+    def get():
         resources = Warehouse.query.all()
         return len(posts_schema.dump(resources))
 

@@ -46,12 +46,6 @@ class WarehouseListResource(Resource):
         db.session.commit()
         return post_schema.dump(new_resource)
 
-
-class WarehouseResource(Resource):
-    def get(self):
-        resources = Warehouse.query.all()
-        return len(posts_schema.dump(resources))
-
     def patch(self, resource_id):
         resource = Warehouse.query.get_or_404(resource_id)
 
@@ -76,8 +70,14 @@ class WarehouseResource(Resource):
         return '', 204
 
 
+class WarehouseTotalResource(Resource):
+    def get(self):
+        resources = Warehouse.query.all()
+        return len(posts_schema.dump(resources))
+
+
 api.add_resource(WarehouseListResource, '/resources')
-api.add_resource(WarehouseResource, '/total_cost/<int:resource_id>')
+api.add_resource(WarehouseTotalResource, '/total_cost/<int:resource_id>')
 post_schema = WarehouseSchema()
 posts_schema = WarehouseSchema(many=True)
 

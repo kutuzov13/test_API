@@ -36,69 +36,75 @@ api = Api(app)
 # ]
 
 
-class Post(db.Model):
+class Warehouse(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     title = db.Column(db.String(50))
     amount = db.Column(db.REAL())
     unit = db.Column(db.String(50))
-    cost = db.Column(db.REAL())
+    price = db.Column(db.REAL())
     date = db.Column(db.String(50))
 
     def __repr__(self):
         return "<Resource %s" % self.title
 
 
-class PostSchema(ma.Schema):
+class WarehouseSchema(ma.Schema):
     class Meta:
-        fields = ("id", "title", "amount", "unit", "cost", "date")
-        model = Post
+        fields = ('id', 'amount', 'price', 'date', 'title', 'unit')
+        model = Warehouse
 
 
-class PostListResource(Resource):
+class WarehouseListResource(Resource):
     def get(self):
-        posts = Post.query.all()
-        return posts_schema.dump(posts)
+        warehouse = Warehouse.query.all()
+        return posts_schema.dump(warehouse)
 
     def post(self):
-        new_post = Post(
+        new_resource = Warehouse(
             title=request.json['title'],
             amount=request.json['amount'],
             unit=request.json['unit'],
-            cost=request.json['cost'],
+            price=request.json['price'],
             date=request.json['date']
         )
-        db.session.add(new_post)
+        db.session.add(new_resource)
         db.session.commit()
-        return post_schema.dump(new_post)
+        return post_schema.dump(new_resource)
 
 
-class PostResource(Resource):
+class WarehouseResource(Resource):
     def get(self):
-        posts = Post.query.all()
-        return len(posts_schema.dump(posts))
+        resources = Warehouse.query.all()
+        return len(posts_schema.dump(resources))
 
     def update(self, post_id):
-        post = Post.query.get_or_404(post_id)
+        resource = Warehouse.query.get_or_404(post_id)
 
         if 'title' in request.json:
-            post.title = request.json['title']
-        if 'content' in request.json:
-            post.content = request.json['content']
+            resource.title = request.json['title']
+        if 'amount' in request.json:
+            resource.content = request.json['amount']
+        if 'unit' in request.json:
+            resource.content = request.json['unit']
+        if 'price' in request.json:
+            resource.content = request.json['price']
+        if 'date' in request.json:
+            resource.content = request.json['date']
 
         db.session.commit()
-        return post_schema.dump(post)
+        return post_schema.dump(resource)
 
     def delete(self, post_id):
-        post = Post.query.get_or_404(post_id)
+        post = Warehouse.query.get_or_404(post_id)
         db.session.delete(post)
         db.session.commit()
         return '', 204
 
 
-api.add_resource(PostResource, '/total_cost')
-api.add_resource(PostListResource, '/resources')
-post_schema = PostSchema()
-posts_schema = PostSchema(many=True)
+api.add_resource(WarehouseResource, '/total_cost')
+api.add_resource(WarehouseListResource, '/resources')
+post_schema = WarehouseSchema()
+posts_schema = WarehouseSchema(many=True)
 
 if __name__ == '__main__':
     app.run(debug=True)

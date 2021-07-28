@@ -1,24 +1,18 @@
-from flask import Flask, request
-from flask_restful import Api, Resource, reqparse
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, jsonify
+from flask_migrate import Migrate
+from flask_restful import Api
+from models.resources import db, Warehouse
 from flask_marshmallow import Marshmallow
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/warehouse'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+app.config['DEBUG'] = True
 ma = Marshmallow(app)
 api = Api(app)
-
-
-class Warehouse(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
-    title = db.Column(db.String(50))
-    amount = db.Column(db.REAL())
-    unit = db.Column(db.String(50))
-    price = db.Column(db.REAL())
-    cost = db.Column(db.Integer())
-    date = db.Column(db.String(50))
+db.init_app(app)
+migrate = Migrate(app, db)
 
 
 class WarehouseSchema(ma.Schema):
@@ -27,64 +21,80 @@ class WarehouseSchema(ma.Schema):
         model = Warehouse
 
 
-class WarehouseListResource(Resource):
-    @staticmethod
-    def get():
-        warehouse = Warehouse.query.all()
-        return {'resources': posts_schema.dump(warehouse), 'total_count': len(posts_schema.dump(warehouse))}
-
-    @staticmethod
-    def post():
-        new_resource = Warehouse(
-            title=request.json['title'],
-            amount=request.json['amount'],
-            unit=request.json['unit'],
-            price=request.json['price'],
-            cost=request.json['amount'] * request.json['price'],
-            date=request.json['date']
-        )
-        db.session.add(new_resource)
-        db.session.commit()
-        return post_schema.dump(new_resource)
-
-    def patch(self, resource_id):
-        resource = Warehouse.query.get_or_404(resource_id)
-
-        if 'title' in request.json:
-            resource.title = request.json['title']
-        if 'amount' in request.json:
-            resource.amount = request.json['amount']
-        if 'unit' in request.json:
-            resource.unit = request.json['unit']
-        if 'price' in request.json:
-            resource.price = request.json['price']
-        if 'date' in request.json:
-            resource.date = request.json['date']
-        resource.date = request.json['amount'] * request.json['price']
-
-        db.session.commit()
-        return post_schema.dump(resource)
-
-    @staticmethod
-    def delete(resource_id):
-        resource = Warehouse.query.get_or_404(resource_id)
-        db.session.delete(resource)
-        db.session.commit()
-        return '', 204
+warehouse_schema = WarehouseSchema()
+warehouse_schemas = WarehouseSchema(many=True)
 
 
-class WarehouseTotalCost(Resource):
-    @staticmethod
-    def get():
-        resources = Warehouse.query.all()
-        total_cost = int(sum([cost.cost for cost in resources]))
-        return {'total_cost': total_cost}
+# Get all resources
+@app.route('/resources', methods=['GET'])
+def get_all_resources():
+    all_resources = Warehouse.query.all()
+    result = warehouse_schemas.dump(all_resources)
+
+    return jsonify({'resources': result,
+                    'total_count': len(result)}), 200
 
 
-api.add_resource(WarehouseListResource, '/resources')
-api.add_resource(WarehouseTotalCost, '/total_cost')
-post_schema = WarehouseSchema()
-posts_schema = WarehouseSchema(many=True)
+# Add resources
+@app.route('/resources', methods=['POST'])
+def add_resource():
+    title = request.json['title']
+    amount = request.json['amount']
+    unit = request.json['unit']
+    price = request.json['price']
+    cost = request.json['cost']
+    date = request.json['date']
+
+    new_product = Warehouse(title, amount, unit, price, cost, date)
+
+    db.session.add(new_product)
+    db.session.commit()
+
+    return warehouse_schema.jsonify(new_product), 201
+
+
+# Update resource
+@app.route('/resources/<id>', methods=['PUT'])
+def update_resources(id):
+    resource = Warehouse.query.get_or_404(id)
+
+    title = request.json['title']
+    amount = request.json['amount']
+    unit = request.json['unit']
+    price = request.json['price']
+    cost = request.json['cost']
+    date = request.json['date']
+
+    resource.title = title
+    resource.amount = amount
+    resource.unit = unit
+    resource.price = price
+    resource.cost = cost
+    resource.date = date
+
+    db.session.commit()
+
+    return warehouse_schema.jsonify(resource), 201
+
+
+# Delete resource
+@app.route('/resources/<id>', methods=['DELETE'])
+def delete_resource(id):
+    resource = Warehouse.query.get(id)
+    db.session.delete(resource)
+    db.session.commit()
+
+    return warehouse_schema.jsonify(resource), 201
+
+
+# total cost of orders on the warehouse
+@app.route('/total_cost', methods=['GET'])
+def get_total_cost():
+    resources = Warehouse.query.all()
+    total_cost = int(sum([cost.cost for cost in resources]))
+
+    return jsonify({'total_cost': total_cost}), 200
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port='5000')

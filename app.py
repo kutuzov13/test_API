@@ -1,26 +1,22 @@
 from flask import Flask, request, jsonify
 from flask_migrate import Migrate
 from flask_restful import Api
-from models.resources import db, Warehouse
 from flask_marshmallow import Marshmallow
+from database import db
+from flasgger import Swagger
+from config import Config
+from models.resources import Warehouse
+from schema.resource import WarehouseSchema
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/warehouse'
+app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['DEBUG'] = True
+app.config['DEBUG'] = Config.DEBUG
 ma = Marshmallow(app)
 api = Api(app)
 db.init_app(app)
 migrate = Migrate(app, db)
-
-
-class WarehouseSchema(ma.Schema):
-    class Meta:
-        fields = ('title', 'id', 'amount', 'unit', 'price', 'cost', 'date')
-        model = Warehouse
-
-
 warehouse_schema = WarehouseSchema()
 warehouse_schemas = WarehouseSchema(many=True)
 

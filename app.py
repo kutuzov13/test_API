@@ -3,7 +3,6 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from flask_marshmallow import Marshmallow
 from database import db
-from flasgger import Swagger
 from config import Config
 from models.resources import Warehouse
 from schema.resource import WarehouseSchema
